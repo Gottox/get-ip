@@ -1,6 +1,6 @@
 [package]
 name = "get-ip"
-version = "0.1.0"
+version = "0.1.2"
 authors = ["Enno Boland <g@s01.de>"]
 edition = "2018"
 
