@@ -6,14 +6,18 @@ use hyper::{Body, Request, Response, Server};
 use log::info;
 use std::net::IpAddr;
 
-fn format_ip(ip: IpAddr) -> String {
-    let mut ip = match ip {
-        IpAddr::V4(v4) => v4.to_string(),
-        IpAddr::V6(v6) => {
-            if let Some(v4) = v6.to_ipv4() {
-                v4.to_string()
-            } else {
-                v6.to_string()
+fn format_ip(req: Request<Body>, ip: IpAddr) -> String {
+    let mut ip = if let Some(ip) = req.headers().get("X-Forwarded-For") {
+        ip.to_str().unwrap_or("0.0.0.0").to_string()
+    } else {
+        match ip {
+            IpAddr::V4(v4) => v4.to_string(),
+            IpAddr::V6(v6) => {
+                if let Some(v4) = v6.to_ipv4() {
+                    v4.to_string()
+                } else {
+                    v6.to_string()
+                }
             }
         }
     };
@@ -29,9 +33,9 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let make_svc = make_service_fn(|socket: &AddrStream| {
         let remote_addr = socket.remote_addr();
         async move {
-            Ok::<_, Infallible>(service_fn(move |_: Request<Body>| {
+            Ok::<_, Infallible>(service_fn(move |req: Request<Body>| {
                 async move {
-                    Ok::<_, Infallible>(Response::new(Body::from(format_ip(remote_addr.ip()))))
+                    Ok::<_, Infallible>(Response::new(Body::from(format_ip(req, remote_addr.ip()))))
                 }
             }))
         }
