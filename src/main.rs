@@ -34,7 +34,9 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         }
     });
 
-    let addr = ([0, 0, 0, 0, 0, 0, 0, 0], 3000).into();
+    let port = std::env::args().skip(1).next().map(|x| x.parse().expect("Cannot parse argument as port")).unwrap_or(3000);
+
+    let addr = ([0, 0, 0, 0, 0, 0, 0, 0], port).into();
 
     let server = Server::bind(&addr).serve(make_svc);
 
