@@ -4,6 +4,7 @@ use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Request, Response, Server};
 use hyper::server::conn::AddrStream;
 use std::net::IpAddr;
+use log::info;
 
 
 fn format_ip(ip: IpAddr) -> String {
@@ -15,6 +16,7 @@ fn format_ip(ip: IpAddr) -> String {
             v6.to_string()
         }
     };
+    info!("Request from {}", ip);
     ip.push_str("\n");
     ip
 }
